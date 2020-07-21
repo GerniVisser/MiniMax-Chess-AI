@@ -1,21 +1,19 @@
-import chess
 from Evaluation import Evalualtion
 
 MAX, MIN = 100000, -100000
 
 # Returns optimal value for current player
 # (Initially called for root and maximizer)
-def minimax(depth, maximizingPlayer, alpha, beta, board, firstMove, checkMate=False):
-
-    boardString = board.fen()
+def minimax(depth, maximizingPlayer, alpha, beta, board, firstMove):
 
     # Terminating condition. i.e
     # leaf node is reached
-    if (depth == 0) or (checkMate):
+    if (depth == 0) or (board.is_game_over()):
+
         if maximizingPlayer:
-            eval = Evalualtion(boardString, "B", checkMate)
+            eval = Evalualtion(board, "W")
         else:
-            eval = Evalualtion(boardString, "W", checkMate)
+            eval = Evalualtion(board, "B")
 
         return eval.result()
 
@@ -24,20 +22,15 @@ def minimax(depth, maximizingPlayer, alpha, beta, board, firstMove, checkMate=Fa
     if maximizingPlayer:
 
         best = MIN
-
         # Recur for left and right children
         for i in board.legal_moves:
 
             board.push(i)
 
-            mateWhite = False
-            if board.is_checkmate():
-                print(i)
-                mateWhite = True
-                #return MAX
+            if checkmate(board) and firstMove:
+                return i
 
-            val = minimax(depth - 1, False, alpha, beta, board, False, mateWhite)
-
+            val = minimax(depth - 1, False, alpha, beta, board, False)
             board.pop()
 
             if val > best:
@@ -51,36 +44,27 @@ def minimax(depth, maximizingPlayer, alpha, beta, board, firstMove, checkMate=Fa
                 break
 
         if firstMove:
-            #print("White best Move first " + str(best_move_white))
+            print(best_move_white)
             return best_move_white
         else:
-            #print("White best Move " + str(best_move_white))
             return best
 
     else:
-        best = MAX
 
-        # Recur for left and
-        # right children
-        #print(board.legal_moves)
+        best = MAX
         for i in board.legal_moves:
 
             board.push(i)
 
-            mateBlack = False
-            if board.is_checkmate():
-                print(i)
-                mateBlack = True
-                #return MIN
+            if checkmate(board) and firstMove:
+                return i
 
-            val = minimax(depth - 1, True, alpha, beta, board, False, mateBlack)
-
+            val = minimax(depth - 1, True, alpha, beta, board, False)
             board.pop()
 
             if val < best:
                 best = val
                 best_move_black = i
-
 
             beta = min(beta, best)
 
@@ -89,19 +73,16 @@ def minimax(depth, maximizingPlayer, alpha, beta, board, firstMove, checkMate=Fa
                 break
 
         if firstMove:
-            #print("Black best Move first " + str(best_move_black))
             return best_move_black
         else:
-            #print("Black best Move " + str(best_move_black))
             return best
 
+def checkmate(board):
+    if board.is_checkmate():
+        return True
+    else:
+        return False
 
-#if __name__ == "__main__":
-#    board = chess.Board()
-#    for x in range(10):
-#        white = minimax(3, MIN, MAX, board, True)
-#        board.push(white)
-#        print(board)
-#        print(board.legal_moves)
-#        board.push_san(input("Make Move"))
+
+
 
