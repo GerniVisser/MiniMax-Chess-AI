@@ -1,84 +1,96 @@
 from Board import DisplayBoard
 from MiniMax import minimax
+from Evaluation import Evalualtion
 import chess
 import pygame as py
 
+# General variables
 MAX, MIN = 100000, -100000
+depth = 1
 
 board = chess.Board()
-fen = board.fen()
+display = DisplayBoard(board)
 
-display = DisplayBoard(fen)
+# Tis function can be run at anytime and wit completely reset the game.
+def setup_game():
+    board.reset_board()
+    display.main_menu()
+    display.update(board)
+    run()
 
-clock = py.time.Clock()
+def move():
+    player_possible_move = display.square_select(py.mouse.get_pos())
+    if player_possible_move != None:
+        try:
+            eval = Evalualtion(board, display.player_color)
+            is_late_game = eval.is_late_game()
 
-def makeMoveWhite(move):
+            if display.player_color == "W":
+                makeMoveWhite(player_possible_move, is_late_game)
+                makeMoveBlack(player_possible_move, is_late_game)
+            else:
+                makeMoveBlack(player_possible_move, is_late_game)
+                makeMoveWhite(player_possible_move, is_late_game)
+        except:
+            print("Invalid Move")
 
-    if player_color == "W":
+def makeMoveWhite(move, is_late_game):
 
+    if display.player_color == "W":
         board.push_uci(move)
-        pass
     else:
-        white = minimax(4, True, MIN, MAX, board, True)
-        #print(white)
+        # The depth attribute has to be odd
+        if is_late_game:
+            white = minimax(depth + 1, True, MIN, MAX, board, True)
+        else:
+            white = minimax(depth + 1, True, MIN, MAX, board, True)
+
         board.push(white)
-    render_pieces()
 
-def makeMoveBlack(move):
+    display.update(board)
 
-    if player_color == "B":
-    #     print(board.legal_moves)
+def makeMoveBlack(move, is_late_game):
+
+    if display.player_color == "B":
         board.push_uci(move)
-
     else:
-        black = minimax(4, False, MIN, MAX, board, True)
+        # The depth attribute has to be even
+        if is_late_game:
+            black = minimax(depth + 2, False, MIN, MAX, board, True)
+        else:
+            black = minimax(depth, False, MIN, MAX, board, True)
         board.push(black)
-    render_pieces()
 
-def render_pieces():
-    for num in display.boardLayout:
-        if display.boardLayout[num] != None:
-            display.win.blit(display.boardLayout[num].render(), (display.boardPos[num][0], display.boardPos[num][1]))
+    display.update(board)
 
-player_color = input("What color do you want to be enter 'W' for white and 'B' for black")
-
-
-while display.run:
-
+def is_game_over(board):
     if board.is_game_over():
-        print("GAME OVER")
+        display.run = False
+        display.game_over = True
+        display.game_over_menu()
 
-    events = py.event.get()
-    for event in events:
-        if event.type == py.QUIT:
-            exit()
+def run():
 
-        if event.type == py.MOUSEBUTTONDOWN and event.button == 1:
-            player_possible_move = display.square_select(py.mouse.get_pos())
-            if player_possible_move != None:
-                try:
-                    makeMoveWhite(player_possible_move)
-                    makeMoveBlack(player_possible_move)
-                except:
-                    print("Invalid Move")
+    if display.player_color == "B":
+        makeMoveWhite(None, False)
 
-        elif event.type == py.MOUSEBUTTONDOWN and event.button == 3:
-            display.remove_square_select()
+    while display.run:
+        events = py.event.get()
+        for event in events:
+            if event.type == py.QUIT:
+                exit()
 
+            if event.type == py.MOUSEBUTTONDOWN and event.button == 1:
+                move()
+            elif event.type == py.MOUSEBUTTONDOWN and event.button == 3:
+                display.remove_square_select()
 
-    #print(py.mouse.get_pos())
+        display.update_screen()
+        is_game_over(board)
 
-    display.update(board.fen())
-
-    # Cycling through BoardLayout to render pieces left on board
-
-    display.win.blit(display.chessBoard, (0, 0))
-
-    render_pieces()
-
-    py.display.update()
-    clock.tick(10)
-
+while run:
+    setup_game()
 
 py.quit()
+
 
