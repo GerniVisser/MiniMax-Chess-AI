@@ -6,7 +6,7 @@ import pygame as py
 
 # General variables
 MAX, MIN = 100000, -100000
-depth = 1
+depth = 4
 
 board = chess.Board()
 display = DisplayBoard(board)
