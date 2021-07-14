@@ -51,7 +51,7 @@ Minimax is a kind of backtracking algorithm that is used in decision making and 
 In Minimax the two players are called maximizer and minimizer. The maximizer tries to get the highest score possible while the minimizer tries to do the opposite and get the lowest score possible.
 Every board state has a value associated with it. In a given state if the maximizer has upper hand then, the score of the board will tend to be some positive value. If the minimizer has the upper hand in that board state then it will tend to be some negative value. The values of the board are calculated by some heuristics which are unique for every type of game.
 
-![Alt Text](https://en.wikipedia.org/wiki/Minimax#/media/File:Minimax.svg)
+![Alt Text](https://upload.wikimedia.org/wikipedia/commons/6/6f/Minimax.svg)
 
 ### Evauation function
 
